@@ -17,7 +17,7 @@ height = 48
 total_pixels = width * height
 
 payload = "1" * total_pixels
-#payload = "1" * 20
+payload = "1" * 20
 screen_control_message_1 = "lcd:" + payload
 print(screen_control_message_1)
 
