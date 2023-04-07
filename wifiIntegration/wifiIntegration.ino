@@ -110,14 +110,13 @@ void handle_lcd_message(byte* payload, unsigned int length) {
   byte* data_payload = payload + 4;
   unsigned int data_length = length - 4;
 
-  for( int y = 0; y < 48; y++ ) {
-    for( int x = 0; x < 64; x++ ) {
-      int index = y * 48 + x;
-      if( data_payload[index] == '1' ) {
-        display.drawPixel(x, y, 1);
-      } else {
-        display.drawPixel(x, y, 0);
-      }
+  for( int index = 0; index < data_length; index++ ) {
+    int y = index / 64;
+    int x = index % 64;
+    if( data_payload[index] == '1' ) {
+      display.drawPixel(x, y, 1);
+    } else {
+      display.drawPixel(x, y, 0);
     }
   }
   display.display();

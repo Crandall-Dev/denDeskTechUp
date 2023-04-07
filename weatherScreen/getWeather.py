@@ -2,6 +2,7 @@ import requests
 import json
 from PIL import Image
 from time import sleep
+from datetime import datetime
 import paho.mqtt.client as paho
 
 # MQTT settings
@@ -81,9 +82,6 @@ def generate_screen_image(temperatures: list) -> Image:
 
 # ********************************************************************** #
 def send_image_to_screen(image: Image) -> None:
-    client1 = paho.Client("weather gen agent")         #create client object
-    client1.connect(broker, port)                      #establish connection
-
     message = "lcd:"
 
     for curr_y in range(SCREEN_MAX_Y):
@@ -95,9 +93,7 @@ def send_image_to_screen(image: Image) -> None:
             else:
                 message += "1"
 
-    client1.publish(topic, message)
-    client1.disconnect()
-
+    mqtt_client.publish(topic, message)
 
 
 # ********************************************************************** #
@@ -108,20 +104,29 @@ def update_temperature_screen():
     send_image_to_screen(image)
 
 
+# ********************************************************************** #
+def send_blank_screen():
+    message = "lcd:" + "0" * (SCREEN_MAX_X * SCREEN_MAX_Y)
+    mqtt_client.publish(topic, message)
 
 
-
+# ********************************************************************** #
 if __name__ == "__main__":
+    global mqtt_client
     print("Starting daemon - 5 minute updates")
     minute_interval = 5
+
+    mqtt_client = paho.Client("weather gen agent")
+    mqtt_client.connect(broker, port)
     try:
         while True:
+            print(datetime.now())
             update_temperature_screen()
             sleep(minute_interval * 60)
-
-
-        pass
     except KeyboardInterrupt:
         print("Received ^C - quitting.")
+        send_blank_screen()
+        sleep(1)
+        mqtt_client.disconnect()
 
     print("Exiting.")
