@@ -8,8 +8,9 @@
 #include <ESP8266WiFi.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_NeoPixel.h>
+
+#define MQTT_MAX_PACKET_SIZE 3100  // The LCD is 64x48 and I'm being wasteful
 #include <PubSubClient.h>
-#define MQTT_MAX_PACKET_SIZE 2048
 
 
 #include "Adafruit_SSD1306_wemos.h"
@@ -104,12 +105,32 @@ void greenStatusLED_OFF() {
 }
 
 // ***************************************************************************** //
+void handle_lcd_message(byte* payload, unsigned int length) {
+  Serial.println("Handling LCD update message");
+  byte* data_payload = payload + 4;
+  unsigned int data_length = length - 4;
+
+  for( int y = 0; y < 48; y++ ) {
+    for( int x = 0; x < 64; x++ ) {
+      int index = y * 48 + x;
+      if( data_payload[index] == '1' ) {
+        display.drawPixel(x, y, 1);
+      } else {
+        display.drawPixel(x, y, 0);
+      }
+    }
+  }
+  display.display();
+}
+
+// ***************************************************************************** //
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
+
+  if( !memcmp(payload, "lcd:", 4) ) {
+    handle_lcd_message(payload, length);
   }
   Serial.println();
 }
@@ -166,7 +187,7 @@ void setup() {
 
 
 
-  testdrawcircle();
+  //testdrawcircle();
 
 }
 

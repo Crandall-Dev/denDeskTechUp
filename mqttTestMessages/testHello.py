@@ -15,9 +15,10 @@ ret = client1.publish(topic, "test message")
 width = 64
 height = 48
 total_pixels = width * height
+print(total_pixels)
 
-payload = "1" * total_pixels
-payload = "1" * 20
+payload = "0" * total_pixels
+#payload = "1" * 300
 screen_control_message_1 = "lcd:" + payload
 print(screen_control_message_1)
 
