@@ -21,7 +21,7 @@ SCREEN_MAX_X = 64
 SCREEN_MAX_Y = 48
 TEMP_PIXEL_RANGE = (0, 39)
 TEMP_PIXEL_MIN_Y = 0
-TEMP_PIXEL_MAX_Y = 39
+TEMP_PIXEL_MAX_Y =47 
 TEMP_MAX_RAIL_C = 40
 TEMP_MIN_RAIL_C = -10
 
@@ -93,6 +93,9 @@ def send_image_to_screen(image: Image) -> None:
             else:
                 message += "1"
 
+    # Doing this twice because... their MQTT server is unreliable
+    mqtt_client.publish(topic, message)
+    sleep(2)
     mqtt_client.publish(topic, message)
 
 
@@ -118,15 +121,18 @@ if __name__ == "__main__":
 
     mqtt_client = paho.Client("weather gen agent")
     mqtt_client.connect(broker, port)
+    sleep(3)
     try:
-        while True:
-            print(datetime.now())
-            update_temperature_screen()
-            sleep(minute_interval * 60)
+        print(datetime.now())
+        update_temperature_screen()
+        sleep(5)
+        # sleep(minute_interval * 60)
     except KeyboardInterrupt:
         print("Received ^C - quitting.")
-        send_blank_screen()
-        sleep(1)
+    finally:
+        #sleep(2)
+        #send_blank_screen()
+        sleep(2)
         mqtt_client.disconnect()
 
     print("Exiting.")

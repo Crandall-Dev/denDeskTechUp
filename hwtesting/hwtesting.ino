@@ -44,6 +44,8 @@ void setup()
 
   Serial.println("PAJ7620 init: OK");
   Serial.println("Please input your gestures:");
+  sensor.invertYAxis();
+  sensor.invertXAxis();
 }
 
 
